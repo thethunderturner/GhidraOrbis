@@ -1,8 +1,6 @@
 name: Build and publish
 
 on:
-  release:
-    types: [ published ]
   push:
     branches: [ master ]
   pull_request:
@@ -13,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghidra: ['12.1.2']
+        ghidra: ['12.0', '12.0.1', '12.0.2', '12.0.3']
 
     steps:
       - name: Checkout
@@ -28,12 +26,10 @@ jobs:
       - name: Get short SHA
         run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
-      # Change depending on version!!
-      - name: Download and Setup Ghidra
-        run: |
-          wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.2_build/ghidra_12.1.2_PUBLIC_20260605.zip
-          unzip ghidra_*.zip
-          echo "GHIDRA_INSTALL_DIR=$(pwd)/ghidra_${{ matrix.ghidra }}_PUBLIC" >> $GITHUB_ENV
+      - name: Setup Ghidra
+        uses: er28-0652/setup-ghidra@master
+        with:
+          version: ${{ matrix.ghidra }}
 
       - name: Build GhidraOrbis
         uses: eskatos/gradle-command-action@v2
@@ -63,4 +59,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create 1.0${{ GITHUB.RUN_NUMBER }} ./*.zip --target ${{ GITHUB.SHA }} -t 1.0${{ GITHUB.RUN_NUMBER }}
-
