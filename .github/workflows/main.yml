@@ -28,10 +28,12 @@ jobs:
       - name: Get short SHA
         run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
-      - name: Setup Ghidra
-        uses: er28-0652/setup-ghidra@master
-        with:
-          version: ${{ matrix.ghidra }}
+      # Change depending on version!!
+      - name: Download and Setup Ghidra
+        run: |
+          wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.2_build/ghidra_12.1.2_PUBLIC_20260605.zip
+          unzip ghidra_*.zip
+          echo "GHIDRA_INSTALL_DIR=$(pwd)/ghidra_${{ matrix.ghidra }}_PUBLIC" >> $GITHUB_ENV
 
       - name: Build GhidraOrbis
         uses: eskatos/gradle-command-action@v2
